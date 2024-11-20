@@ -1,0 +1,40 @@
+In implementarea temei am pornit de la scheletul laboratorului 9, din care am preluat si cateva functii.
+In client.c:
+ -retin adresa ip a serverului pentru a ma conecta, apoi folosesc un while care ruleaza pana la primirea comenzii "exit".
+ In acest while ma conectez la server pentru a avea deschisa conexiunea atata timp cat se citesc comenzi
+Daca intalnesc comanda:
+ -exit - nu fac nimic, doar ies din program
+ -register - citesc de la tastatura username/parola, pe care le transform in format JSON, adaug HTTP-ul cu continutul 
+ JSON si trimit mesajul catre server, analizez raspunsul si daca s a efectuat cu succes afisez mesaj corespunzator,
+ in caz contrar afisez un mesaj de eroare.
+ -login - pasii sunt identici cu cei de la comanda register. La final dupa afisarea mesajului corespunzator, extrag cookie care va fi folosit la
+ comanda urmatoare folosind strstr.
+ -enter-library - construiesc mesajul adaugand cookie-ul primit la comanda login la param de cookies din HTTP, apoi trimit
+ mesajul la server, analizez raspunsul, afisez mesajul. Daca accesul e permis, extrag token-ul JWT pe care l folosesc in
+ urmatoarele comenzi(necesar autorizarii) din biblioteca(il extrag cu ajutorul parserul-ului de JSON)
+ -get_books -  construiesc mesajul adaugand parametrul Authorization(cu tokenul JWT primit la intrarea in biblioteca) la
+ headerul de HTTP, apoi trimit mesajul catre server, analizez raspunsul, afisez mesajul, dar si lista de carti primita.
+ -add_book - am apelez functia get_book, care citeste detaliile fiecarei carti(titlu, gen..)pe care vreau sa o adaug(verific
+conditiile impuse pentru fiecare parametru), transform detaliile in format JSON.
+ adaug payloadul de tip JSON la headerul de HTTP si trimit mesajul si urmez pasii ca la comenzile anterioare.
+ -get_book - citesc de la tastatura id ul cartii apeland functia ajutatoare get_id pe care mi am implementat, unde verific
+ de asemenea daca este o valoare valida(ar trebui sa fie cifra), adaug id-ul la finalul URL si trimit mesajul si urmez pasii
+ ca mai sus, afisand la final si detaliile cartii daca a fost cu succes.
+ -delete_book - extrag id-ul cartii pe care vreau s-o sterg, construiesc mesajul adaugand acest id la finalul URL, trimit
+ mesajul, analizez raspunsul, afisez mesaj.
+ -logout - adaug headerul HTTP si trimit mesajul, analizez raspunsul, afisez mesaj si actualizez variabila login, pentru a
+ marca faptul ca un user s a delogat, resetez tokenul JWT si cookieul de login vechi.
+Functiile implementate pentru a ma ajuta(ex:get_id, get_book) sunt implementate in helpers.c
+Fisierul "requests.h" contine declaratiile functiilor pentru a crea si gestiona cereri HTTP de tip GET, DELETE și POST.
+char *compute_get_request- am folosit o pentru a crea o cerere HTTP de tip GET catre un server specificat prin host si url,
+in care query_params este folosit pentru a trimite parametrii opiionali cu cererea GET. Parametrul cookies este un vector de
+siruri care contine cookie-urile de trimis cu cererea. cookies_count indica numarul de cookie-uri. Parametrul auth este un
+indicator pentru autentificarea cu token-ul specificat. Functia returneaza mesajul de cerere HTTP creat.
+char *compute_delete_request-este similara cu compute_get_request, dar este folosita pentru a crea o cerere HTTP de tip DELETE
+char *compute_post_request- implementata pentru a crea o cerere HTTP de tip POST, content_type specifică tipul continutului trimis
+in corpul cererii; parametrul body_data este un vector de siruri care contine datele de trimis in corpul cererii. body_data_fields_count
+indica numarul de campuri de date, restul parametrilor sunt ca cei de mai sus.
+In cadrul implementarii, am utilizat biblioteca Parson pentru a gestiona datele primite si trimise catre server in jormat JSON.
+Mai precis, am folosit functiille bibliotecii pentru parsarea raspunsurilor JSON primite de la server, dar si pentru generarea de 
+obiecte JSON pentru a transmite cereri catre server. Am optat sa aleg PARSON, pentru ca Parson ofera o interfata simplă si intuitiva
+pentru manipularea datelor JSON, de altfel e prima din care am inteles repede ce presupun functiile pe care le are.
